@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace ListFiles
 {
+    [Serializable]
     class Directory
     {
         public static NameCompare nameCompare = new NameCompare();
@@ -16,39 +17,49 @@ namespace ListFiles
 
         public string text { get; set; }
 
+        public string name { get; set; }
+
         public int childrenAmount { get; set; }
 
-        public Directory(string text, bool isDirectory)
+        public Directory(string name)
         {
-            if (isDirectory)
-                list = new List<Directory>();
+           list = new List<Directory>();
 
+            this.name = name;
+            this.isDirectory = true;
+            this.childrenAmount = -1;
+        }
+
+        public Directory(string name, string text)
+        {
+            this.name = name;
             this.text = text;
-            this.isDirectory = isDirectory;
+            this.isDirectory = false;
             this.childrenAmount = -1;
         }
 
         public void CreateList(DirectoryInfo directoryInfo, ref Directory parent, int deep = 0)
         {
-            int childrenAmount;
             string consoleOutput;
             foreach (FileSystemInfo systemFile in directoryInfo.GetFileSystemInfos())
             {
                 if ((systemFile.Attributes & FileAttributes.Directory) == FileAttributes.Directory)
                 {
-                    childrenAmount = ((DirectoryInfo)systemFile).ChildrenAmount();
-                    consoleOutput = systemFile.Name + " (" + childrenAmount + ") " + systemFile.DOSAttributes();
-                    Directory newDirChild = new Directory(consoleOutput, true);
+                    Directory newDirChild = new Directory(systemFile.Name);
+                    ((DirectoryInfo)systemFile).ChildrenAmount(ref newDirChild);
+                    newDirChild.text = systemFile.Name + " (" + newDirChild.childrenAmount + ") " + systemFile.DOSAttributes();
                     parent.list.Add(newDirChild);
                     newDirChild.CreateList((DirectoryInfo)systemFile, ref newDirChild, deep + 1);
                 }
                 else
                 {
                     consoleOutput = systemFile.Name + " " + ((FileInfo)systemFile).Length + " bajtow " + systemFile.DOSAttributes();
-                    parent.list.Add(new Directory(consoleOutput, false));
+                    parent.list.Add(new Directory(systemFile.Name, consoleOutput));
                 }
             }
         }
+
+       
 
         public void ListFiles(Directory parent, int deep = 0)
         {

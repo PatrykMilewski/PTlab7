@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -23,16 +24,31 @@ namespace ListFiles
             comparator = false;
 
             DirectoryInfo directoryInfo = new DirectoryInfo(fileLoc);
-            
-            
-            int childrenAmount = directoryInfo.ChildrenAmount();
-            Directory root = new Directory(directoryInfo.Name + " " + childrenAmount + " " + directoryInfo.DOSAttributes(), true);
+            Directory root = new Directory("Work");
+            directoryInfo.ChildrenAmount(ref root);
+            root.text = directoryInfo.Name + " " + root.childrenAmount + " " + directoryInfo.DOSAttributes();
+
             root.CreateList(directoryInfo, ref root);
             root.SortList(root);
             root.ListFiles(root);
 
-            System.Console.Write('\n');
-            System.Console.WriteLine(directoryInfo.TheOldestElement());
+            System.Console.WriteLine("\nNajstarszy plik: " + directoryInfo.TheOldestElement().ToString());
+
+            FileStream fileStream = new FileStream("C:\\Work\\work.dat", FileMode.Create);
+            BinaryFormatter formatter = new BinaryFormatter();
+
+            formatter.Serialize(fileStream, root.list);
+            fileStream.Flush();
+            fileStream.Close();
+
+            root = new Directory("Work");
+            directoryInfo.ChildrenAmount(ref root);
+            root.text = directoryInfo.Name + " " + root.childrenAmount + " " + directoryInfo.DOSAttributes();
+
+            fileStream = new FileStream("C:\\Work\\work.dat", FileMode.Open);
+            root.list = (List<Directory>)formatter.Deserialize(fileStream);
+
+            root.ListFiles(root);
 
             System.Console.ReadKey();
         }
@@ -61,17 +77,33 @@ namespace ListFiles
             return theOldestThis;
         }
 
-        public static int ChildrenAmount(this DirectoryInfo fileSystemInfo)
+        public static void ChildrenAmount(this DirectoryInfo directoryInfo, ref Directory directory)
         {
             int amount = 0;
-            foreach (FileSystemInfo systemFile in fileSystemInfo.GetFileSystemInfos())
+            foreach (FileSystemInfo systemFile in directoryInfo.GetFileSystemInfos())
             {
                 if ((systemFile.Attributes & FileAttributes.Directory) == FileAttributes.Directory)   // is directory
                     amount += ((DirectoryInfo)systemFile).ChildrenAmount() + 1;
-                
+
                 else
                     amount++;
             }
+
+            directory.childrenAmount = amount;
+        }
+
+        private static int ChildrenAmount(this DirectoryInfo directoryInfo)
+        {
+            int amount = 0;
+            foreach (FileSystemInfo systemFile in directoryInfo.GetFileSystemInfos())
+            {
+                if ((systemFile.Attributes & FileAttributes.Directory) == FileAttributes.Directory)   // is directory
+                    amount += ((DirectoryInfo)systemFile).ChildrenAmount() + 1;
+
+                else
+                    amount++;
+            }
+
             return amount;
         }
 

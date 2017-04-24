@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace ListFiles
 {
@@ -10,11 +6,11 @@ namespace ListFiles
     {
         public int Compare(Directory first, Directory second)
         {
-            if (first.text.Length != second.text.Length)
-                return first.text.Length - second.text.Length;
+            if (first.name.Length != second.name.Length)
+                return first.name.Length - second.name.Length;
 
             else
-                return first.text.CompareTo(second.text);
+                return first.name.CompareTo(second.name);
         }
     }
 }
