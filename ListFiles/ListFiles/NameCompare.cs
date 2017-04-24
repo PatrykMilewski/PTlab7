@@ -6,22 +6,15 @@ using System.Threading.Tasks;
 
 namespace ListFiles
 {
-    class NameCompare : IComparer<ListElement>
+    class NameCompare : IComparer<Directory>
     {
-        public int Compare(ListElement first, ListElement second)
+        public int Compare(Directory first, Directory second)
         {
-            if (first.deep == second.deep)
-            {
-                if (first.text.Length != second.text.Length)
+            if (first.text.Length != second.text.Length)
                 return first.text.Length - second.text.Length;
 
             else
-                return first.text.CompareTo(second);
-            }
-            else
-            {
-                return first.deep - second.deep;
-            }
+                return first.text.CompareTo(second.text);
         }
     }
 }

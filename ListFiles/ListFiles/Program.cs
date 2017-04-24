@@ -21,15 +21,18 @@ namespace ListFiles
             String fileLoc = "C:\\Work";
             sort = true;
             comparator = false;
-            List<ListElement> list = new List<ListElement>();
 
-            DirectoryInfo directory = new DirectoryInfo(fileLoc);
+            DirectoryInfo directoryInfo = new DirectoryInfo(fileLoc);
+            
+            
+            int childrenAmount = directoryInfo.ChildrenAmount();
+            Directory root = new Directory(directoryInfo.Name + " " + childrenAmount + " " + directoryInfo.DOSAttributes(), true);
+            root.CreateList(directoryInfo, ref root);
+            root.SortList(root);
+            root.ListFiles(root);
 
-            directory.CreateList(ref list);
-
-            list.Sort(new NameCompare());
-
-
+            System.Console.Write('\n');
+            System.Console.WriteLine(directoryInfo.TheOldestElement());
 
             System.Console.ReadKey();
         }
@@ -37,33 +40,6 @@ namespace ListFiles
 
     static class DirectoryInfoExtensions
     {
-        public static void CreateList(this DirectoryInfo directoryInfo, ref List<ListElement> list, int deep = 0)
-        {
-            int childrenAmount;
-            string consoleOutput;
-            foreach (FileSystemInfo systemFile in directoryInfo.GetFileSystemInfos())
-            {
-                if ((systemFile.Attributes & FileAttributes.Directory) == FileAttributes.Directory)
-                {
-                    childrenAmount = ((DirectoryInfo)systemFile).ChildrenAmount();
-                    consoleOutput = "";
-                    for (int i = 0; i < deep; i++)
-                        consoleOutput += '\t';
-                    consoleOutput += systemFile.Name + " " + childrenAmount + " " + systemFile.DOSAttributes();
-                    list.Add(new ListElement(deep, consoleOutput));
-                    ((DirectoryInfo)systemFile).CreateList(ref list, deep + 1);
-                }
-                else
-                {
-                    consoleOutput = "";
-                    for (int i = 0; i < deep; i++)
-                        consoleOutput += '\t';
-                    consoleOutput += systemFile.Name + " " + ((FileInfo)systemFile).Length + " " + systemFile.DOSAttributes();
-                    list.Add(new ListElement(deep, consoleOutput));
-                }
-            }
-        }
-
         public static DateTime TheOldestElement(this DirectoryInfo directoryInfo)
         {
             DateTime directoryOldest, theOldestThis = directoryInfo.LastWriteTime;
@@ -91,7 +67,7 @@ namespace ListFiles
             foreach (FileSystemInfo systemFile in fileSystemInfo.GetFileSystemInfos())
             {
                 if ((systemFile.Attributes & FileAttributes.Directory) == FileAttributes.Directory)   // is directory
-                    amount += ((DirectoryInfo)systemFile).ChildrenAmount();
+                    amount += ((DirectoryInfo)systemFile).ChildrenAmount() + 1;
                 
                 else
                     amount++;

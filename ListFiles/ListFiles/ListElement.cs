@@ -8,16 +8,17 @@ namespace ListFiles
 {
     class ListElement
     {
-        public int deep { get; set; }
+        public bool isDirectory { get; set; }
+
         public string text { get; set; }
 
-        public ListElement(int deep, string text)
+        public ListElement(string text, bool isDirectory)
         {
-            this.deep = deep;
             this.text = text;
+            this.isDirectory = isDirectory;
         }
 
-        public string printElement()
+        public string printElement(int deep)
         {
             string output = "";
             for (int i = 0; i < deep; i++)
